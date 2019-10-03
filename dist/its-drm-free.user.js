@@ -6,6 +6,7 @@
 // @license MIT; https://github.com/kevinfiol/its-drm-free/blob/master/LICENSE
 // @include http://*.steampowered.com/app/*
 // @include https://*.steampowered.com/app/*
+// @include https://*.steampowered.com/wishlist/*
 // @icon https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/icon.png
 // @updateURL https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/its-drm-free.user.js
 // @downloadURL https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/its-drm-free.user.js
@@ -106,9 +107,7 @@
         var endpoint = this.makeEndpoint('v02', 'game', 'plain');
         var data = { key: this.api_key, shop: shop, game_id: game_id };
 
-        return get(endpoint, data)
-            .then(function (data) { return console.log(data); })
-        ;
+        return get(endpoint, data);
     };
 
     ITAD.prototype.getSteamPlainId = function(steam_appid) {
@@ -122,7 +121,7 @@
 
     ITAD.prototype.getPrices = function(plain_id, region, country) {
         var endpoint = this.makeEndpoint('v01', 'game', 'prices');
-        var data = { key: this.api_key, plains: plain_id, shops: 'gog,itchio', region: region, country: country };
+        var data = { key: this.api_key, plains: plain_id, shops: 'gog,itchio,humblestore', region: region, country: country };
 
         return get(endpoint, data)
             .then(this.parseResponse)
@@ -134,7 +133,8 @@
         BASE_URL: 'https://api.isthereanydeal.com',
         API_KEY: 'd047b30e0fc7d9118f3953de04fa6af9eba22379',
         GOG_ICON_URL: 'https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/gog.png',
-        ITCH_ICON_URL: 'https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/itch.png'
+        ITCH_ICON_URL: 'https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/itch.png',
+        HUMBLE_ICON_URL: 'https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/humble.png'
     };
 
     /**
@@ -202,6 +202,7 @@
     var isDirective = function (o) {
         return typeof o === 'function' && directives.has(o);
     };
+    //# sourceMappingURL=directive.js.map
 
     /**
      * @license
@@ -235,6 +236,7 @@
             start = n;
         }
     };
+    //# sourceMappingURL=dom.js.map
 
     /**
      * @license
@@ -258,6 +260,7 @@
      * A sentinel value that signals a NodePart to fully clear its content.
      */
     var nothing = {};
+    //# sourceMappingURL=part.js.map
 
     /**
      * @license
@@ -472,6 +475,7 @@
      *    * (') then any non-(')
      */
     var lastAttributeNameRegex = /([ \x09\x0a\x0c\x0d])([^\0-\x1F\x7F-\x9F "'>=/]+)([ \x09\x0a\x0c\x0d]*=[ \x09\x0a\x0c\x0d]*(?:[^ \x09\x0a\x0c\x0d"'`<>=]*|"[^"]*|'[^']*))$/;
+    //# sourceMappingURL=template.js.map
 
     /**
      * @license
@@ -608,6 +612,7 @@
         }
         return fragment;
     };
+    //# sourceMappingURL=template-instance.js.map
 
     /**
      * @license
@@ -694,6 +699,7 @@
         template.innerHTML = this.getHTML();
         return template;
     };
+    //# sourceMappingURL=template-result.js.map
 
     /**
      * @license
@@ -1146,6 +1152,7 @@
         (eventOptionsSupported ?
             { capture: o.capture, passive: o.passive, once: o.once } :
             o.capture); };
+    //# sourceMappingURL=parts.js.map
 
     /**
      * @license
@@ -1188,6 +1195,7 @@
         return new NodePart(options);
     };
     var defaultTemplateProcessor = new DefaultTemplateProcessor();
+    //# sourceMappingURL=default-template-processor.js.map
 
     /**
      * @license
@@ -1235,6 +1243,7 @@
         return template;
     }
     var templateCaches = new Map();
+    //# sourceMappingURL=template-factory.js.map
 
     /**
      * @license
@@ -1275,6 +1284,7 @@
         part.setValue(result);
         part.commit();
     };
+    //# sourceMappingURL=render.js.map
 
     /**
      * @license
@@ -1303,6 +1313,7 @@
 
     	return new TemplateResult(strings, values, 'html', defaultTemplateProcessor);
     };
+    //# sourceMappingURL=lit-html.js.map
 
     /**
      * @license
@@ -1377,12 +1388,21 @@
         }
         styleMapCache.set(part, styleInfo);
     }; });
+    //# sourceMappingURL=style-map.js.map
 
     var templateObject$1 = Object.freeze(["\n                    <span style=\"padding-right: 2em;\">\n                        <a href=", ">\n                            <img\n                                src=", "\n                                style=\"width: 20px; height: 20px; vertical-align: middle; margin: 0 4px 0 0;\"\n                            />\n                            $", "\n                        </a>\n                    </span>\n                "]);
     var templateObject = Object.freeze(["\n    <div style=", ">\n        <div style=\"padding-bottom: 1em;\">\n            <b>DRM-Free versions available from:</b>\n        </div>\n        \n        <div>\n            ", "\n        </div>\n    </div>\n"]);
 
     var gog_icon_url = config.GOG_ICON_URL;
     var itch_icon_url = config.ITCH_ICON_URL;
+    var humble_icon_url = config.HUMBLE_ICON_URL;
+
+    var getIconUrl = function (store_id) {
+        if (store_id === 'gog') { return gog_icon_url; }
+        if (store_id === 'itchio') { return itch_icon_url; }
+        if (store_id === 'humblestore') { return humble_icon_url; }
+        return '';
+    };
 
     var ContainerStyles = {
         padding: '1em',
@@ -1394,36 +1414,113 @@
     };
 
     var Container = function (stores) { return html(templateObject, styleMap(ContainerStyles), stores.map(function (s) {
-                    return html(templateObject$1, s.url, s.shop.id === 'gog' ? gog_icon_url : itch_icon_url, s.price_new);
+                    if (s.shop.id === 'humblestore' && s.drm.indexOf('DRM Free') < 0) {
+                        // Humble Store version is not DRM-Free
+                        return null;
+                    }
+
+                    return html(templateObject$1, s.url, getIconUrl(s.shop.id), s.price_new);
                 })); };
 
     var location = window.location;
     var path = location.pathname.split('/');
 
-    if (path[2]) {
-        var app_id = path[2];
+    // App Page
+    if (path[1] === 'app') {
+        if (path[2]) {
+            var app_id = path[2];
+        
+            /**
+             * Collect Data
+             */
+            var itad = new ITAD(config.BASE_URL, config.API_KEY);
+        
+            itad.getSteamPlainId(app_id)
+                .then(function (id) { return itad.getPrices(id, 'us', 'US'); })
+                .then(function (data) {
+                    var stores = data.list;
+        
+                    if (stores.length) {
+                        if (stores.length === 1) {
+                            // Check if HumbleStore is the only store
+                            // If it is, make sure it has a DRM Free version
+                            // Else, don't render the Container
+                            var store = stores[0];
+                            
+                            if (store.shop.id === 'humblestore' && store.drm.indexOf('DRM Free') < 0) {
+                                return;
+                            }
+                        }
+        
+                        // Game Store Page
+                        var purchaseBox = q('.game_area_purchase_game');
+                        var appContainer = c('div', 'its-drm-free-container');
+        
+                        purchaseBox.insertAdjacentElement('beforebegin', appContainer);
+                        render(Container(stores), appContainer);
+                    }
+                })
+            ;
+        }
+    }
 
-        /**
-         * Collect Data
-         */
-        var itad = new ITAD(config.BASE_URL, config.API_KEY);
+    // Wishlist
+    if (path[1] === 'wishlist') {
+        var mutationCallback = function (mutationList, observer) {
+            mutationList.forEach(function (mutation) {
+                var row = mutation.addedNodes[0];
+        
+                if (row) {
+                    row.addEventListener('mouseenter', function (e) {
+                        var app_id = row.dataset.appId;
 
-        itad.getSteamPlainId(app_id)
-            .then(function (id) { return itad.getPrices(id, 'us', 'US'); })
-            .then(function (data) {
-                var stores = data.list;
-                console.log(stores);
+                        var row_title = row.querySelector('a.title');
+                        row_title.insertAdjacentElement('afterend', c('p', 'foo', 'foopota'));
 
-                if (stores.length) {
-                    // Game Store Page
-                    var purchaseBox = q('.game_area_purchase_game');
-                    var appContainer = c('div', 'its-on-gog-container');
+                        // /**
+                        //  * Collect Data
+                        //  */
+                        // const itad = new ITAD(config.BASE_URL, config.API_KEY);
+                    
+                        // itad.getSteamPlainId(app_id)
+                        //     .then(id => itad.getPrices(id, 'us', 'US'))
+                        //     .then(data => {
+                        //         const stores = data.list;
+                    
+                        //         if (stores.length) {
+                        //             if (stores.length === 1) {
+                        //                 // Check if HumbleStore is the only store
+                        //                 // If it is, make sure it has a DRM Free version
+                        //                 // Else, don't render the Container
+                        //                 const store = stores[0];
+                                        
+                        //                 if (store.shop.id === 'humblestore' && store.drm.indexOf('DRM Free') < 0) {
+                        //                     return;
+                        //                 }
+                        //             }
+                    
 
-                    purchaseBox.insertAdjacentElement('beforebegin', appContainer);
-                    render(Container(stores), appContainer);
+                        //             const appContainer = c('div', 'its-drm-free-container');
+                        //             row.insertAdjacentElement('beforebegin', appContainer);
+
+                        //             render(Container(stores), appContainer);
+                        //         }
+                        //     })
+                        // ;
+                    });
                 }
-            })
-        ;
+            });
+        };
+        
+        var wishlist = q('#wishlist_ctn');
+        var observer = new MutationObserver(mutationCallback);
+        
+        observer.observe(wishlist, {
+            childList: true,
+            attributes: false,
+            subtree: false
+        });
     }
 
 }());
+//# sourceMappingURL=its-drm-free.user.js.map
