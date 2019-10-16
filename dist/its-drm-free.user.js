@@ -1422,45 +1422,51 @@
                     return html(templateObject$1, s.url, getIconUrl(s.shop.id), s.price_new);
                 })); };
 
+    var templateObject$2 = Object.freeze(["\n    <div>\n        <p>hello</p>\n    </div>\n"]);
+
+    var WishlistContainer = function () { return html(templateObject$2); };
+
     var location = window.location;
     var path = location.pathname.split('/');
+    var itad = new ITAD(config.BASE_URL, config.API_KEY);
+
+    function getStores(app_id, callback) {    
+        itad.getSteamPlainId(app_id)
+            .then(function (id) { return itad.getPrices(id, 'us', 'US'); })
+            .then(function (data) {
+                var stores = data.list;
+
+                if (stores.length) {
+                    if (stores.length === 1) {
+                        // Check if HumbleStore is the only store
+                        // If it is, make sure it has a DRM Free version
+                        // Else, don't render the Container
+                        var store = stores[0];
+                        
+                        if (store.shop.id === 'humblestore' && store.drm.indexOf('DRM Free') < 0) {
+                            return;
+                        }
+                    }
+
+                    callback(stores);
+                }
+            })
+        ;
+    }
 
     // App Page
     if (path[1] === 'app') {
         if (path[2]) {
             var app_id = path[2];
-        
-            /**
-             * Collect Data
-             */
-            var itad = new ITAD(config.BASE_URL, config.API_KEY);
-        
-            itad.getSteamPlainId(app_id)
-                .then(function (id) { return itad.getPrices(id, 'us', 'US'); })
-                .then(function (data) {
-                    var stores = data.list;
-        
-                    if (stores.length) {
-                        if (stores.length === 1) {
-                            // Check if HumbleStore is the only store
-                            // If it is, make sure it has a DRM Free version
-                            // Else, don't render the Container
-                            var store = stores[0];
-                            
-                            if (store.shop.id === 'humblestore' && store.drm.indexOf('DRM Free') < 0) {
-                                return;
-                            }
-                        }
-        
-                        // Game Store Page
-                        var purchaseBox = q('.game_area_purchase_game');
-                        var appContainer = c('div', 'its-drm-free-container');
-        
-                        purchaseBox.insertAdjacentElement('beforebegin', appContainer);
-                        render(Container(stores), appContainer);
-                    }
-                })
-            ;
+
+            getStores(app_id, function (stores) {
+                // Game Store Page
+                var purchaseBox = q('.game_area_purchase_game');
+                var appContainer = c('div', 'its-drm-free-container');
+
+                purchaseBox.insertAdjacentElement('beforebegin', appContainer);
+                render(Container(stores), appContainer);
+            });
         }
     }
 
@@ -1471,42 +1477,26 @@
                 var row = mutation.addedNodes[0];
         
                 if (row) {
+                    // Check to see if container already exists, if so, remove.
+                    var existing = row.querySelector('div.idf-wishlist-container');
+                    if (existing && existing.parentNode) {
+                        existing.parentNode.removeChild(existing);
+                    }
+
+                    var row_title = row.querySelector('a.title');
+                    var wishlistContainer = c('div', 'idf-wishlist-container');
+                    wishlistContainer.style.display = 'none';
+
+                    row_title.insertAdjacentElement('afterend', wishlistContainer);
+                    render(WishlistContainer(), wishlistContainer);
+
+                    row.addEventListener('mouseleave', function (e) {
+                        wishlistContainer.style.display = 'none';
+                    });
+
                     row.addEventListener('mouseenter', function (e) {
                         var app_id = row.dataset.appId;
-
-                        var row_title = row.querySelector('a.title');
-                        row_title.insertAdjacentElement('afterend', c('p', 'foo', 'foopota'));
-
-                        // /**
-                        //  * Collect Data
-                        //  */
-                        // const itad = new ITAD(config.BASE_URL, config.API_KEY);
-                    
-                        // itad.getSteamPlainId(app_id)
-                        //     .then(id => itad.getPrices(id, 'us', 'US'))
-                        //     .then(data => {
-                        //         const stores = data.list;
-                    
-                        //         if (stores.length) {
-                        //             if (stores.length === 1) {
-                        //                 // Check if HumbleStore is the only store
-                        //                 // If it is, make sure it has a DRM Free version
-                        //                 // Else, don't render the Container
-                        //                 const store = stores[0];
-                                        
-                        //                 if (store.shop.id === 'humblestore' && store.drm.indexOf('DRM Free') < 0) {
-                        //                     return;
-                        //                 }
-                        //             }
-                    
-
-                        //             const appContainer = c('div', 'its-drm-free-container');
-                        //             row.insertAdjacentElement('beforebegin', appContainer);
-
-                        //             render(Container(stores), appContainer);
-                        //         }
-                        //     })
-                        // ;
+                        wishlistContainer.style.display = 'block';
                     });
                 }
             });
