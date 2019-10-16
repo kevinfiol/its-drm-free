@@ -4,6 +4,7 @@ import nodeResolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import buble from 'rollup-plugin-buble';
 import MagicString from 'magic-string';
+import serve from 'rollup-plugin-serve';
 
 const isProd = process.env.PROD === 'true';
 const isDev = process.env.DEV === 'true';
@@ -43,7 +44,10 @@ const config = {
             transforms: { dangerousTaggedTemplateString: true, dangerousForOf: true }
         }),
 
-        prependBanner({ banner: annotations })
+        prependBanner({ banner: annotations }),
+
+        // Development-only Plugins
+        isDev && serve('dist')
     ]
 };
 

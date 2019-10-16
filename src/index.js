@@ -10,7 +10,7 @@ const path = location.pathname.split('/');
 const itad = new ITAD(config.BASE_URL, config.API_KEY);
 
 function getStores(app_id, callback) {    
-    itad.getSteamPlainId(app_id)
+    return itad.getSteamPlainId(app_id)
         .then(id => itad.getPrices(id, 'us', 'US'))
         .then(data => {
             const stores = data.list;

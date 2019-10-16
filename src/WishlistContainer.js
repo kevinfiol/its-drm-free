@@ -13,10 +13,6 @@ const getIconUrl = store_id => {
     return '';
 };
 
-const WishlistContainerStyles = {
-    display: 'none'
-};
-
 const WishlistContainer = () => html`
     <div>
         <p>hello</p>

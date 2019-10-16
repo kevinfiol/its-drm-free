@@ -1431,7 +1431,7 @@
     var itad = new ITAD(config.BASE_URL, config.API_KEY);
 
     function getStores(app_id, callback) {    
-        itad.getSteamPlainId(app_id)
+        return itad.getSteamPlainId(app_id)
             .then(function (id) { return itad.getPrices(id, 'us', 'US'); })
             .then(function (data) {
                 var stores = data.list;
