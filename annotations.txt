@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name its-drm-free
 // @namespace https://github.com/kevinfiol/its-drm-free
-// @version 1.0.0
+// @version 1.0.1
 // @description Find games available on DRM-free platforms while browsing Steam Storefront
 // @license MIT; https://github.com/kevinfiol/its-drm-free/blob/master/LICENSE
 // @include http://*.steampowered.com/app/*
 // @include https://*.steampowered.com/app/*
+// @include https://*.steampowered.com/wishlist/*
 // @icon https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/icon.png
 // @updateURL https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/its-drm-free.user.js
 // @downloadURL https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/its-drm-free.user.js

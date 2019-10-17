@@ -22,9 +22,7 @@ ITAD.prototype.getPlainId = function(shop, game_id) {
     const endpoint = this.makeEndpoint('v02', 'game', 'plain');
     const data = { key: this.api_key, shop, game_id };
 
-    return get(endpoint, data)
-        .then(data => console.log(data))
-    ;
+    return get(endpoint, data);
 };
 
 ITAD.prototype.getSteamPlainId = function(steam_appid) {
@@ -38,7 +36,7 @@ ITAD.prototype.getSteamPlainId = function(steam_appid) {
 
 ITAD.prototype.getPrices = function(plain_id, region, country) {
     const endpoint = this.makeEndpoint('v01', 'game', 'prices');
-    const data = { key: this.api_key, plains: plain_id, shops: 'gog,itchio', region, country };
+    const data = { key: this.api_key, plains: plain_id, shops: 'gog,itchio,humblestore', region, country };
 
     return get(endpoint, data)
         .then(this.parseResponse)
