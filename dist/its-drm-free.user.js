@@ -202,7 +202,6 @@
     var isDirective = function (o) {
         return typeof o === 'function' && directives.has(o);
     };
-    //# sourceMappingURL=directive.js.map
 
     /**
      * @license
@@ -236,7 +235,6 @@
             start = n;
         }
     };
-    //# sourceMappingURL=dom.js.map
 
     /**
      * @license
@@ -260,7 +258,6 @@
      * A sentinel value that signals a NodePart to fully clear its content.
      */
     var nothing = {};
-    //# sourceMappingURL=part.js.map
 
     /**
      * @license
@@ -475,7 +472,6 @@
      *    * (') then any non-(')
      */
     var lastAttributeNameRegex = /([ \x09\x0a\x0c\x0d])([^\0-\x1F\x7F-\x9F "'>=/]+)([ \x09\x0a\x0c\x0d]*=[ \x09\x0a\x0c\x0d]*(?:[^ \x09\x0a\x0c\x0d"'`<>=]*|"[^"]*|'[^']*))$/;
-    //# sourceMappingURL=template.js.map
 
     /**
      * @license
@@ -612,7 +608,6 @@
         }
         return fragment;
     };
-    //# sourceMappingURL=template-instance.js.map
 
     /**
      * @license
@@ -699,7 +694,6 @@
         template.innerHTML = this.getHTML();
         return template;
     };
-    //# sourceMappingURL=template-result.js.map
 
     /**
      * @license
@@ -1152,7 +1146,6 @@
         (eventOptionsSupported ?
             { capture: o.capture, passive: o.passive, once: o.once } :
             o.capture); };
-    //# sourceMappingURL=parts.js.map
 
     /**
      * @license
@@ -1195,7 +1188,6 @@
         return new NodePart(options);
     };
     var defaultTemplateProcessor = new DefaultTemplateProcessor();
-    //# sourceMappingURL=default-template-processor.js.map
 
     /**
      * @license
@@ -1243,7 +1235,6 @@
         return template;
     }
     var templateCaches = new Map();
-    //# sourceMappingURL=template-factory.js.map
 
     /**
      * @license
@@ -1284,7 +1275,6 @@
         part.setValue(result);
         part.commit();
     };
-    //# sourceMappingURL=render.js.map
 
     /**
      * @license
@@ -1313,7 +1303,6 @@
 
     	return new TemplateResult(strings, values, 'html', defaultTemplateProcessor);
     };
-    //# sourceMappingURL=lit-html.js.map
 
     var templateObject$1 = Object.freeze(["\n                <span style=\"padding-right: 2em;\">\n                    <a href=", ">\n                        <img\n                            src=", "\n                            style=\"width: 20px; height: 20px; vertical-align: middle; margin: 0 4px 0 0;\"\n                        />\n                        $", "\n                    </a>\n                </span>\n            "]);
     var templateObject = Object.freeze(["\n    <div>\n        ", "\n    </div>\n"]);
@@ -1411,7 +1400,6 @@
         }
         styleMapCache.set(part, styleInfo);
     }; });
-    //# sourceMappingURL=style-map.js.map
 
     var templateObject$2 = Object.freeze(["\n    <div style=", ">\n        <div style=\"padding-bottom: 1em;\">\n            <b>DRM-Free versions available from:</b>\n        </div>\n        \n        ", "\n    </div>\n"]);
 
@@ -1525,4 +1513,3 @@
     }
 
 }());
-//# sourceMappingURL=its-drm-free.user.js.map
