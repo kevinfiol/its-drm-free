@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name its-drm-free
 // @namespace https://github.com/kevinfiol/its-drm-free
-// @version 1.0.0
+// @version 1.0.1
 // @description Find games available on DRM-free platforms while browsing Steam Storefront
 // @license MIT; https://github.com/kevinfiol/its-drm-free/blob/master/LICENSE
 // @include http://*.steampowered.com/app/*
@@ -1315,6 +1315,29 @@
     };
     //# sourceMappingURL=lit-html.js.map
 
+    var templateObject$1 = Object.freeze(["\n                <span style=\"padding-right: 2em;\">\n                    <a href=", ">\n                        <img\n                            src=", "\n                            style=\"width: 20px; height: 20px; vertical-align: middle; margin: 0 4px 0 0;\"\n                        />\n                        $", "\n                    </a>\n                </span>\n            "]);
+    var templateObject = Object.freeze(["\n    <div>\n        ", "\n    </div>\n"]);
+
+    var gog_icon_url = config.GOG_ICON_URL;
+    var itch_icon_url = config.ITCH_ICON_URL;
+    var humble_icon_url = config.HUMBLE_ICON_URL;
+
+    var getIconUrl = function (store_id) {
+        if (store_id === 'gog') { return gog_icon_url; }
+        if (store_id === 'itchio') { return itch_icon_url; }
+        if (store_id === 'humblestore') { return humble_icon_url; }
+        return '';
+    };
+
+    var Stores = function (stores) { return html(templateObject, stores.map(function (s) {
+                if (s.shop.id === 'humblestore' && s.drm.indexOf('DRM Free') < 0) {
+                    // Humble Store version is not DRM-Free
+                    return null;
+                }
+
+                return html(templateObject$1, s.url, getIconUrl(s.shop.id), s.price_new);
+            })); };
+
     /**
      * @license
      * Copyright (c) 2018 The Polymer Project Authors. All rights reserved.
@@ -1390,21 +1413,9 @@
     }; });
     //# sourceMappingURL=style-map.js.map
 
-    var templateObject$1 = Object.freeze(["\n                    <span style=\"padding-right: 2em;\">\n                        <a href=", ">\n                            <img\n                                src=", "\n                                style=\"width: 20px; height: 20px; vertical-align: middle; margin: 0 4px 0 0;\"\n                            />\n                            $", "\n                        </a>\n                    </span>\n                "]);
-    var templateObject = Object.freeze(["\n    <div style=", ">\n        <div style=\"padding-bottom: 1em;\">\n            <b>DRM-Free versions available from:</b>\n        </div>\n        \n        <div>\n            ", "\n        </div>\n    </div>\n"]);
+    var templateObject$2 = Object.freeze(["\n    <div style=", ">\n        <div style=\"padding-bottom: 1em;\">\n            <b>DRM-Free versions available from:</b>\n        </div>\n        \n        ", "\n    </div>\n"]);
 
-    var gog_icon_url = config.GOG_ICON_URL;
-    var itch_icon_url = config.ITCH_ICON_URL;
-    var humble_icon_url = config.HUMBLE_ICON_URL;
-
-    var getIconUrl = function (store_id) {
-        if (store_id === 'gog') { return gog_icon_url; }
-        if (store_id === 'itchio') { return itch_icon_url; }
-        if (store_id === 'humblestore') { return humble_icon_url; }
-        return '';
-    };
-
-    var ContainerStyles = {
+    var AppContainerStyles = {
         padding: '1em',
         position: 'relative',
         backgroundColor: 'rgba(0, 0, 0, 0.2)',
@@ -1413,18 +1424,11 @@
         zIndex: '0'
     };
 
-    var Container = function (stores) { return html(templateObject, styleMap(ContainerStyles), stores.map(function (s) {
-                    if (s.shop.id === 'humblestore' && s.drm.indexOf('DRM Free') < 0) {
-                        // Humble Store version is not DRM-Free
-                        return null;
-                    }
+    var AppContainer = function (children) { return html(templateObject$2, styleMap(AppContainerStyles), children); };
 
-                    return html(templateObject$1, s.url, getIconUrl(s.shop.id), s.price_new);
-                })); };
+    var templateObject$3 = Object.freeze(["\n    <div>\n        <div>\n            <b>DRM-Free versions available from:</b>\n        </div>\n        \n        ", "\n    </div>\n"]);
 
-    var templateObject$2 = Object.freeze(["\n    <div>\n        <p>hello</p>\n    </div>\n"]);
-
-    var WishlistContainer = function () { return html(templateObject$2); };
+    var WishlistContainer = function (children) { return html(templateObject$3, children); };
 
     var location = window.location;
     var path = location.pathname.split('/');
@@ -1434,20 +1438,16 @@
         return itad.getSteamPlainId(app_id)
             .then(function (id) { return itad.getPrices(id, 'us', 'US'); })
             .then(function (data) {
-                var stores = data.list;
-
-                if (stores.length) {
-                    if (stores.length === 1) {
-                        // Check if HumbleStore is the only store
-                        // If it is, make sure it has a DRM Free version
-                        // Else, don't render the Container
-                        var store = stores[0];
-                        
-                        if (store.shop.id === 'humblestore' && store.drm.indexOf('DRM Free') < 0) {
-                            return;
-                        }
+                var stores = data.list.filter(function (store) {
+                    // Have to do this check for HumbleStore
+                    if (store.shop.id === 'humblestore') {
+                        return store.drm.indexOf('DRM Free') > -1;
                     }
+                    
+                    return true;
+                });
 
+                if (stores.length > 0) {
                     callback(stores);
                 }
             })
@@ -1463,15 +1463,17 @@
                 // Game Store Page
                 var purchaseBox = q('.game_area_purchase_game');
                 var appContainer = c('div', 'its-drm-free-container');
-
                 purchaseBox.insertAdjacentElement('beforebegin', appContainer);
-                render(Container(stores), appContainer);
+
+                render(AppContainer( Stores(stores) ), appContainer);
             });
         }
     }
 
     // Wishlist
     if (path[1] === 'wishlist') {
+        var cache = {};
+
         var mutationCallback = function (mutationList, observer) {
             mutationList.forEach(function (mutation) {
                 var row = mutation.addedNodes[0];
@@ -1483,12 +1485,11 @@
                         existing.parentNode.removeChild(existing);
                     }
 
-                    var row_title = row.querySelector('a.title');
+                    var referenceEl = row.querySelector('div.value.release_date');
                     var wishlistContainer = c('div', 'idf-wishlist-container');
-                    wishlistContainer.style.display = 'none';
 
-                    row_title.insertAdjacentElement('afterend', wishlistContainer);
-                    render(WishlistContainer(), wishlistContainer);
+                    wishlistContainer.style.display = 'none';
+                    referenceEl.insertAdjacentElement('afterend', wishlistContainer);
 
                     row.addEventListener('mouseleave', function (e) {
                         wishlistContainer.style.display = 'none';
@@ -1496,7 +1497,18 @@
 
                     row.addEventListener('mouseenter', function (e) {
                         var app_id = row.dataset.appId;
-                        wishlistContainer.style.display = 'block';
+
+                        if (app_id in cache) {
+                            var stores = cache[app_id];
+                            render(WishlistContainer( Stores(stores) ), wishlistContainer);
+                            wishlistContainer.style.display = 'block';
+                        } else {
+                            getStores(app_id, function (stores) {
+                                cache[app_id] = stores;
+                                render(WishlistContainer( Stores(stores) ), wishlistContainer);
+                                wishlistContainer.style.display = 'block';
+                            });
+                        }
                     });
                 }
             });

@@ -1,6 +1,6 @@
 {
   "name": "its-drm-free",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Userscript for Steam Storefront to highlight DRM-Free games",
   "main": "src/index.js",
   "repository": "git@github.com:kevinfiol/its-drm-free.git",

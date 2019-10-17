@@ -1,9 +1,12 @@
 import ITAD from './services/ITAD';
 import config from './config';
-import Container from './Container';
-import WishlistContainer from './WishlistContainer';
 import { render } from 'lit-html';
 import { q, c } from './util';
+
+// Components
+import Stores from './components/Stores';
+import AppContainer from './components/AppContainer';
+import WishlistContainer from './components/WishlistContainer';
 
 const location = window.location;
 const path = location.pathname.split('/');
@@ -13,20 +16,16 @@ function getStores(app_id, callback) {
     return itad.getSteamPlainId(app_id)
         .then(id => itad.getPrices(id, 'us', 'US'))
         .then(data => {
-            const stores = data.list;
-
-            if (stores.length) {
-                if (stores.length === 1) {
-                    // Check if HumbleStore is the only store
-                    // If it is, make sure it has a DRM Free version
-                    // Else, don't render the Container
-                    const store = stores[0];
-                    
-                    if (store.shop.id === 'humblestore' && store.drm.indexOf('DRM Free') < 0) {
-                        return;
-                    }
+            const stores = data.list.filter(store => {
+                // Have to do this check for HumbleStore
+                if (store.shop.id === 'humblestore') {
+                    return store.drm.indexOf('DRM Free') > -1;
                 }
+                
+                return true;
+            });
 
+            if (stores.length > 0) {
                 callback(stores);
             }
         })
@@ -42,15 +41,17 @@ if (path[1] === 'app') {
             // Game Store Page
             const purchaseBox = q('.game_area_purchase_game');
             const appContainer = c('div', 'its-drm-free-container');
-
             purchaseBox.insertAdjacentElement('beforebegin', appContainer);
-            render(Container(stores), appContainer);
+
+            render(AppContainer( Stores(stores) ), appContainer);
         });
     }
 }
 
 // Wishlist
 if (path[1] === 'wishlist') {
+    const cache = {};
+
     const mutationCallback = (mutationList, observer) => {
         mutationList.forEach(mutation => {
             const row = mutation.addedNodes[0];
@@ -62,12 +63,11 @@ if (path[1] === 'wishlist') {
                     existing.parentNode.removeChild(existing);
                 }
 
-                const row_title = row.querySelector('a.title');
+                const referenceEl = row.querySelector('div.value.release_date');
                 const wishlistContainer = c('div', 'idf-wishlist-container');
-                wishlistContainer.style.display = 'none';
 
-                row_title.insertAdjacentElement('afterend', wishlistContainer);
-                render(WishlistContainer(), wishlistContainer);
+                wishlistContainer.style.display = 'none';
+                referenceEl.insertAdjacentElement('afterend', wishlistContainer);
 
                 row.addEventListener('mouseleave', e => {
                     wishlistContainer.style.display = 'none';
@@ -75,7 +75,18 @@ if (path[1] === 'wishlist') {
 
                 row.addEventListener('mouseenter', e => {
                     const app_id = row.dataset.appId;
-                    wishlistContainer.style.display = 'block';
+
+                    if (app_id in cache) {
+                        const stores = cache[app_id];
+                        render(WishlistContainer( Stores(stores) ), wishlistContainer);
+                        wishlistContainer.style.display = 'block';
+                    } else {
+                        getStores(app_id, stores => {
+                            cache[app_id] = stores;
+                            render(WishlistContainer( Stores(stores) ), wishlistContainer);
+                            wishlistContainer.style.display = 'block';
+                        });
+                    }
                 });
             }
         });
