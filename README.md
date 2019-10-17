@@ -1,6 +1,6 @@
 ## It's DRM Free
 
-![screenshot](https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/screenshot.png)
+![screenshot](https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/screencap.png)
 
 A Userscript to help you find DRM-free versions of games you find on Steam. Provides data on latest prices from DRM-free Storefronts while browing the Steam Storefront or Steam Wishlists.
 
