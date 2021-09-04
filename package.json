@@ -1,26 +1,24 @@
 {
   "name": "its-drm-free",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Userscript for Steam Storefront to highlight DRM-Free games",
   "main": "src/index.js",
   "repository": "git@github.com:kevinfiol/its-drm-free.git",
   "author": "'kevinfiol' <me@kevinfiol.com>",
   "license": "MIT",
+  "type": "module",
   "engines": {
     "node": "14.16.x"
   },
   "scripts": {
-    "start": "rollup -c -w",
-    "build": "rollup -c"
+    "dev": "watchlist src --eager -- npm run build",
+    "build": "node ./scripts/build.js"
   },
   "dependencies": {
     "lit-html": "^1.1.2"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^20.0.0",
-    "@rollup/plugin-node-resolve": "^13.0.4",
-    "magic-string": "^0.25.3",
-    "rollup": "^2.56.3",
-    "rollup-plugin-serve": "^1.1.0"
+    "esbuild": "^0.12.25",
+    "watchlist": "^0.3.1"
   }
 }
