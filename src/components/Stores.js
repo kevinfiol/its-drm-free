@@ -20,6 +20,11 @@ const Stores = stores => html`
                 return null;
             }
 
+            if (s.shop.id === 'gog') {
+                // remove ad tracking from URL
+                s.url = 'https://www.gog.com' + decodeURIComponent(s.url.split('www.gog.com')[1]);
+            }
+
             return html`
                 <span style="padding-right: 2em;">
                     <a href=${ s.url }>
