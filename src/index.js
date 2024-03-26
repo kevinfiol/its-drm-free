@@ -1,7 +1,9 @@
 import { mount } from 'umhi';
 import { getGameId, getStorePrices } from './itad';
 import { Container, Prices } from './components';
+import { VERSION } from './config';
 
+const LOG_MESSAGE = `=== its-drm-free version ${VERSION} ===`;
 const [_, PAGE_TYPE, APP_ID] = window.location.pathname.split('/');
 
 async function getStores(app_id, callback) {
@@ -22,6 +24,7 @@ async function getStores(app_id, callback) {
 
 // App Page
 if (PAGE_TYPE === 'app' && APP_ID) {
+  console.log(LOG_MESSAGE);
   getStores(APP_ID, prices => {
     const appContainer = document.createElement('div');
     appContainer.classList.add('its-drm-free-container');
@@ -38,6 +41,7 @@ if (PAGE_TYPE === 'app' && APP_ID) {
 
 // Wishlist
 if (PAGE_TYPE === 'wishlist') {
+  console.log(LOG_MESSAGE);
   const cache = {};
 
   const mutationCallback = (mutationList) => {

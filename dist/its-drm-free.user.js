@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name its-drm-free
 // @namespace https://github.com/kevinfiol/its-drm-free
-// @version 1.2.1
+// @version 1.2.2
 // @description Find games available on DRM-free platforms while browsing Steam Storefront
 // @license MIT; https://github.com/kevinfiol/its-drm-free/blob/master/LICENSE
 // @include http://*.steampowered.com/app/*
@@ -118,6 +118,7 @@
   }
 
   // src/config.js
+  var VERSION = "1.2.2";
   var API_KEY = "d047b30e0fc7d9118f3953de04fa6af9eba22379";
   var GOG_ICON_URL = "https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/gog.png";
   var ITCH_ICON_URL = "https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/itch.png";
@@ -300,6 +301,7 @@
   );
 
   // src/index.js
+  var LOG_MESSAGE = `=== its-drm-free version ${VERSION} ===`;
   var [_, PAGE_TYPE, APP_ID] = window.location.pathname.split("/");
   async function getStores(app_id, callback) {
     try {
@@ -317,6 +319,7 @@
     }
   }
   if (PAGE_TYPE === "app" && APP_ID) {
+    console.log(LOG_MESSAGE);
     getStores(APP_ID, (prices) => {
       const appContainer = document.createElement("div");
       appContainer.classList.add("its-drm-free-container");
@@ -331,6 +334,7 @@
     });
   }
   if (PAGE_TYPE === "wishlist") {
+    console.log(LOG_MESSAGE);
     const cache = {};
     const mutationCallback = (mutationList) => {
       mutationList.forEach((mutation) => {

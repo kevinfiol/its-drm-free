@@ -1,12 +1,3 @@
-export const getDateStr = (timestamp) => {
-  const date = new Date(timestamp);
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const year = date.getFullYear();
-
-  return `${month}/${day}/${year}`;
-};
-
 export const request = (method, url, { params = {}, body = {} } = {}) => {
   const queryArr = Object.keys(params).map(key => {
     return `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`;
