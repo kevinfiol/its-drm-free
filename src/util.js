@@ -1,78 +1,64 @@
-/**
- * DOM Methods
- */
-const q = query => document.querySelector(query);
+export const getDateStr = (timestamp) => {
+  const date = new Date(timestamp);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const year = date.getFullYear();
 
-const c = (tag, className, innerHTML = '') => {
-    const el = document.createElement(tag);
-    el.className = className;
-    el.innerHTML = innerHTML;
-    return el;
+  return `${month}/${day}/${year}`;
 };
 
-const createPriceFormatter = (sign, delimiter, left) => {
-    return (price) => {
-        const delimited_price = price.replace('.', delimiter);
-        return left ? `${sign}${delimited_price}` : `${delimited_price}${sign}`;
-    };
-};
+export const request = (method, url, { params = {}, body = {} } = {}) => {
+  const queryArr = Object.keys(params).map(key => {
+    return `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`;
+  });
 
-const capitalize = str => str.trim()[0].toUpperCase() + str.trim().slice(1);
+  const queryStr = queryArr.join('&');
 
-const getDateStr = unixTime => {
-    const date = new Date(unixTime * 1000);
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const year = date.getFullYear();
+  return new Promise((resolve, reject) => {
+    if (window.GM_xmlhttpRequest) {
+      const xhr = window.GM_xmlhttpRequest;
 
-    return `${month}/${day}/${year}`;
-};
+      xhr({
+        method: method,
+        url: `${url}?${queryStr}`,
+        data: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' },
+        onload: res => {
+          let json = {};
 
-const request = (method, endpoint, params = {}) => {
-    let queryString = '';
+          try {
+            json = JSON.parse(res.responseText);
+          } catch { /* nothing */ }
 
-    const queryArr = Object.keys(params).map(key =>
-        `${ encodeURIComponent(key) }=${ encodeURIComponent(params[key]) }`
-    );
+          if (res.status >= 200 && res.status < 400) {
+            resolve(json);
+          } else {
+            reject(json);
+          }
+        },
+        onerror: err => reject(err)
+      });
+    } else {
+      const xhr = new XMLHttpRequest();
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.open(method, `${url}?${queryStr}`);
 
-    if (queryArr.length)
-        queryString = '?' + queryArr.join('&');
+      xhr.onload = () => {
+        let json = {};
 
-    const url = endpoint + queryString;
+        try {
+          json = JSON.parse(xhr.response);
+        } catch { /* nothing */ }
 
-    return new Promise((resolve, reject) => {
-        if (window.GM_xmlhttpRequest) {
-            const xhr = window.GM_xmlhttpRequest;
-
-            xhr({
-                method,
-                url,
-                onload: res => {
-                    if (res.status >= 200 && res.status < 300) {
-                        resolve(res.responseText);
-                    } else {
-                        reject(res.statusText);
-                    }
-                },
-                onerror: err => reject(err.statusText)
-            });
+        if (xhr.status >= 200 && xhr.status < 400) {
+          resolve(json);
         } else {
-            const xhr = new XMLHttpRequest();
-            xhr.open(method, url);
-    
-            xhr.onload = () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    resolve(xhr.response);
-                } else {
-                    reject(xhr.statusText);
-                }
-            };
-    
-            xhr.onerror = () => reject(xhr.statusText);
-            xhr.send();
+          reject(json);
         }
-    });
+      };
+
+      xhr.onerror = () => reject(xhr);
+      xhr.send(JSON.stringify(body));
+    }
+  });
 };
-
-
-export { q, c, createPriceFormatter, capitalize, getDateStr, request }

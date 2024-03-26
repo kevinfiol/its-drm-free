@@ -1,43 +1,62 @@
+import servbot from 'servbot';
 import esbuild from 'esbuild';
-import { readFileSync, openSync, writeSync, close } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { resolve } from 'path';
+import { annotate } from './annotate.js';
+import packageJSON from '../package.json' assert { type: 'json' };
 
-const ENTRY = '../src/index.js';
-const OUTPUT = '../dist/its-drm-free.user.js';
-const ANNOTATIONS_PATH = '../annotations.txt';
+export const OUTFILE = resolve('dist/its-drm-free.user.js');
+const DEV = process.argv.includes('--dev');
+const ENTRY = resolve('src/index.js');
 
-build(ENTRY, OUTPUT, { format: 'iife', minify: false });
+/** @type {esbuild.BuildOptions} **/
+const config = {
+  format: 'iife',
+  entryPoints: [ENTRY],
+  outfile: OUTFILE,
+  bundle: true,
+  sourcemap: DEV,
+  define: {
+    'process.env.VERSION': `"${packageJSON.version}"`
+  },
+  plugins: [{
+    name: 'on-end',
+    setup(build) {
+      build.onEnd(({ errors }) => {
+        if (errors[0]) {
+          logError(errors[0]);
+          return;
+        }
 
-function build(entry, outfile, config = {}) {
-    const opts = {
-        entryPoints: [join(__dirname, entry)],
-        bundle: true,
-        outfile: join(__dirname, outfile),
-        ...config
-    };
+        logSuccess();
+        annotate(packageJSON.version);
+      });
+    }
+  }]
+};
 
-    esbuild.build(opts).then(() => {
-        console.log('\x1b[42m%s\x1b[0m', `Bundled: ${outfile}`);
-    }).then(() => {
-        // get annotations as a string
-        const annotations = readFileSync(join(__dirname, ANNOTATIONS_PATH), 'utf8');
+if (DEV) {
+  const ctx = await esbuild.context(config);
+  await ctx.watch();
 
-        // open bundled file to write to
-        const bundleFile = readFileSync(join(__dirname, outfile));
-        const fileDescriptor = openSync(join(__dirname, outfile), 'w+');
-        const buffer = Buffer.from(annotations + '\n');
+  const server = servbot({
+    root: 'dist',
+    reload: false
+  });
 
-        // write to file
-        writeSync(fileDescriptor, buffer, 0, buffer.length, 0);
-        writeSync(fileDescriptor, bundleFile, 0, bundleFile.length, buffer.length);
+  server.listen(8081);
 
-        console.log('\x1b[42m%s\x1b[0m', `Prepended annotations.txt to: ${outfile}`);
-        close(fileDescriptor, err => {
-            if (err) throw err;
-        });
-    }).catch((e) => {
-        console.error('\x1b[41m%s\x1b[0m', e.message);
-    });
+  process.on('exit', () => {
+    ctx.dispose();
+    server.close();
+  });
+} else {
+  await esbuild.build(config);
+}
+
+function logSuccess() {
+  console.log('\x1b[42m%s\x1b[0m', `Bundled: ${OUTFILE}`);
+}
+
+function logError(msg) {
+  console.error('\x1b[41m%s\x1b[0m', msg)
 }
