@@ -11,7 +11,7 @@ const getIconUrl = (shop) => {
 export const Prices = ({ prices }) => (
   m('div',
     Object.entries(prices).map(([shop, data]) =>
-      m('span', { style: { paddingRight: '2em' } },
+      m('span', { style: { paddingRight: '2em' }, title: shop },
         m('a', { href: data.url },
           m('img', {
             src: getIconUrl(shop),

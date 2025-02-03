@@ -1,6 +1,6 @@
 {
   "name": "its-drm-free",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Userscript for Steam Storefront to highlight DRM-Free games",
   "author": "'kevinfiol' <me@kevinfiol.com>",
   "license": "MIT",

@@ -51,27 +51,21 @@ export async function getStorePrices(gameId) {
 
     if (res.length && res[0].deals.length) {
       const deals = res[0].deals;
+
       for (const deal of deals) {
         const shopId = deal.shop.id;
-        let shop = '';
-
-        if (shopId === ITCH) shop = 'itch';
+        const shop =
+          shopId === ITCH ? 'itch' :
+          shopId === HUMBLE ? 'humble' :
+          shopId === GOG ? 'gog' : '';
 
         if (shopId === HUMBLE) {
-          shop = 'humble';
           const isDrmFree = deal.drm.some((drm) =>
             drm.id === DRM_FREE || drm.name === DRM_FREE_TAG
           );
 
           if (!isDrmFree) continue;
         }
-
-        if (shopId === GOG) {
-          shop = 'gog'
-          const finalUrl = await request('GET', deal.url)
-            .catch((res) => decodeURIComponent(res.finalUrl));
-          deal.url = 'https://www.gog.com' + decodeURIComponent(finalUrl.split('www.gog.com')[1]);
-        };
 
         data[shop] = {
           shop,

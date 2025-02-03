@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name its-drm-free
 // @namespace https://github.com/kevinfiol/its-drm-free
-// @version 1.2.2
+// @version 1.2.3
 // @description Find games available on DRM-free platforms while browsing Steam Storefront
 // @license MIT; https://github.com/kevinfiol/its-drm-free/blob/master/LICENSE
 // @include http://*.steampowered.com/app/*
@@ -118,7 +118,7 @@
   }
 
   // src/config.js
-  var VERSION = "1.2.2";
+  var VERSION = "1.2.3";
   var API_KEY = "d047b30e0fc7d9118f3953de04fa6af9eba22379";
   var GOG_ICON_URL = "https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/gog.png";
   var ITCH_ICON_URL = "https://raw.githubusercontent.com/kevinfiol/its-drm-free/master/dist/itch.png";
@@ -217,23 +217,14 @@
         const deals = res[0].deals;
         for (const deal of deals) {
           const shopId = deal.shop.id;
-          let shop = "";
-          if (shopId === ITCH)
-            shop = "itch";
+          const shop = shopId === ITCH ? "itch" : shopId === HUMBLE ? "humble" : shopId === GOG ? "gog" : "";
           if (shopId === HUMBLE) {
-            shop = "humble";
             const isDrmFree = deal.drm.some(
               (drm) => drm.id === DRM_FREE || drm.name === DRM_FREE_TAG
             );
             if (!isDrmFree)
               continue;
           }
-          if (shopId === GOG) {
-            shop = "gog";
-            const finalUrl = await request("GET", deal.url).catch((res2) => decodeURIComponent(res2.finalUrl));
-            deal.url = "https://www.gog.com" + decodeURIComponent(finalUrl.split("www.gog.com")[1]);
-          }
-          ;
           data[shop] = {
             shop,
             price: `$${deal.price.amount}`,
@@ -262,7 +253,7 @@
     Object.entries(prices).map(
       ([shop, data]) => m(
         "span",
-        { style: { paddingRight: "2em" } },
+        { style: { paddingRight: "2em" }, title: shop },
         m(
           "a",
           { href: data.url },
