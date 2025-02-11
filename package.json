@@ -10,7 +10,7 @@
     "build": "node scripts/build.js"
   },
   "devDependencies": {
-    "esbuild": "^0.20.2",
+    "esbuild": "^0.25.0",
     "servbot": "^0.2.6"
   },
   "dependencies": {
